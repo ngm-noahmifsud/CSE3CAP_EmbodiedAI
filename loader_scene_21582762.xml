@@ -1,0 +1,143 @@
+<mujoco model="capstone_scene">
+  <include file="mujoco_menagerie/hello_robot_stretch/stretch.xml"/>
+
+  <statistic center="0.8 -0.5 0.5" extent="2.8" meansize="0.05"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="-150" elevation="-25"/>
+  </visual>
+
+  <asset>
+    <texture type="2d" name="floor_tex" builtin="checker"
+             rgb1=".85 .85 .85" rgb2=".65 .65 .65" width="128" height="128"/>
+    <material name="floor_mat" texture="floor_tex" texrepeat="6 6" reflectance="0.05"/>
+
+    <texture type="2d" name="wood_tex" builtin="flat"
+             rgb1=".75 .55 .3" rgb2=".6 .4 .2" width="64" height="64"/>
+    <material name="wood_mat" texture="wood_tex"/>
+
+    <!--
+      Belt texture: narrow checker stripes running across the belt (y-axis).
+      width=4 height=64 + texrepeat="16 1" creates thin bands along x,
+      giving the impression of a flat belt surface.
+    -->
+    <texture type="2d" name="belt_tex" builtin="checker"
+             rgb1=".12 .12 .12" rgb2=".22 .22 .22" width="4" height="64"/>
+    <material name="belt_mat" texture="belt_tex" texrepeat="16 1"/>
+
+    <material name="frame_mat" rgba="0.30 0.30 0.30 1"/>
+
+    <!-- Cube colours — alternating red / blue for downstream sorting -->
+    <material name="red_mat"  rgba="0.85 0.1  0.1  1"/>
+    <material name="blue_mat" rgba="0.1  0.15 0.85 1"/>
+  </asset>
+
+  <worldbody>
+    <light name="main_light" pos="0.8 -0.5 2.5" dir="0 0 -1" directional="true"
+           diffuse="0.7 0.7 0.7" specular="0.1 0.1 0.1"/>
+    <light name="fill_light" pos="-1 1 2" dir="0.3 -0.3 -1" directional="true"
+           diffuse="0.3 0.3 0.3" specular="0 0 0"/>
+
+    <geom name="floor" size="0 0 0.05" type="plane" material="floor_mat"/>
+
+    <!-- =========================================================
+         TABLE
+         Centre x=0, y=-0.9.  Top surface at z=0.70.
+         Narrowed in y (0.10 half) so robot mast/arm visually clear
+         the table edge during navigation.
+         contype/conaffinity=2 so only cubes (type 3) rest on it;
+         robot bodies (type 1) pass through without collision.
+         ========================================================= -->
+    <body name="table" pos="0 -0.9 0">
+      <geom name="table_top" type="box" size="0.35 0.10 0.02"
+            pos="0 0 0.68" mass="20" material="wood_mat"
+            contype="2" conaffinity="2"/>
+      <geom name="table_leg1" type="cylinder" size="0.025 0.34"
+            pos=" 0.30 0 0.34" mass="1" rgba="0.5 0.35 0.2 1"
+            contype="2" conaffinity="2"/>
+      <geom name="table_leg2" type="cylinder" size="0.025 0.34"
+            pos="-0.30 0 0.34" mass="1" rgba="0.5 0.35 0.2 1"
+            contype="2" conaffinity="2"/>
+    </body>
+
+    <!-- =========================================================
+         CUBES — 4 cubes, half-size 0.040 m (8 cm)
+         Positions are overwritten by Python at startup.
+         Alternating red / blue for the downstream sorting robot.
+         ========================================================= -->
+    <body name="cube_0" pos="0 -0.9 0.74">
+      <freejoint name="cube_0_joint"/>
+      <geom type="box" size="0.040 0.040 0.040" mass="0.25" material="red_mat"
+           contype="3" conaffinity="3"/>
+    </body>
+    <body name="cube_1" pos="0 -0.9 0.74">
+      <freejoint name="cube_1_joint"/>
+      <geom type="box" size="0.040 0.040 0.040" mass="0.25" material="blue_mat"
+           contype="3" conaffinity="3"/>
+    </body>
+    <body name="cube_2" pos="0 -0.9 0.74">
+      <freejoint name="cube_2_joint"/>
+      <geom type="box" size="0.040 0.040 0.040" mass="0.25" material="red_mat"
+           contype="3" conaffinity="3"/>
+    </body>
+    <body name="cube_3" pos="0 -0.9 0.74">
+      <freejoint name="cube_3_joint"/>
+      <geom type="box" size="0.040 0.040 0.040" mass="0.25" material="blue_mat"
+           contype="3" conaffinity="3"/>
+    </body>
+
+    <!-- =========================================================
+         CONVEYOR — flat belt, centre x=2.0, y=-0.9
+         Belt top surface at z=0.31.
+         Python detects cubes on the belt and applies a +x force
+         to simulate belt movement.  Direction arrow on surface.
+         contype/conaffinity=2: robot passes through; cubes land on it.
+         ========================================================= -->
+    <body name="conveyor" pos="2.0 -1.20 0">
+
+      <!-- Structural base -->
+      <geom name="conv_base" type="box" size="0.65 0.16 0.14"
+            pos="0 0 0.15" material="frame_mat" mass="15"
+            contype="2" conaffinity="2"/>
+
+      <!-- Flat belt surface — cubes land here; robot passes through -->
+      <geom name="conv_surface" type="box" size="0.63 0.13 0.01"
+            pos="0 0 0.30" material="belt_mat" mass="1"
+            friction="0.05 0.01 0.001" contype="2" conaffinity="2"/>
+
+      <!-- Left guide rail -->
+      <geom name="conv_rail_l" type="box" size="0.65 0.015 0.04"
+            pos="0  0.145 0.34" material="frame_mat" mass="1"
+            contype="2" conaffinity="2"/>
+      <!-- Right guide rail -->
+      <geom name="conv_rail_r" type="box" size="0.65 0.015 0.04"
+            pos="0 -0.145 0.34" material="frame_mat" mass="1"
+            contype="2" conaffinity="2"/>
+
+      <!-- Direction arrow — visual only (no collision) -->
+      <!-- Arrow shaft -->
+      <geom name="arrow_shaft" type="box" size="0.20 0.012 0.001"
+            pos="0.05 0 0.312" material="frame_mat"
+            contype="0" conaffinity="0" rgba="0.6 0.6 0.1 1"/>
+      <!-- Arrow head (right triangle pointing in +x) -->
+      <geom name="arrow_head" type="box" size="0.04 0.03 0.001"
+            pos="0.27 0 0.312" euler="0 0 0" material="frame_mat"
+            contype="0" conaffinity="0" rgba="0.6 0.6 0.1 1"/>
+
+    </body>
+  </worldbody>
+
+  <!-- No conveyor actuators needed — belt force applied in Python -->
+
+  <!-- ── Collision bitmask strategy ───────────────────────────────────────
+       Robot geoms    : contype=1 conaffinity=1  (default — untouched)
+       Floor          : contype=1 conaffinity=1  (default)
+       Table geoms    : contype=2 conaffinity=2  → only cubes (type 3) collide
+       Conveyor geoms : contype=2 conaffinity=2  → only cubes (type 3) collide
+       Cube geoms     : contype=3 conaffinity=3  → collide with table, conveyor, floor
+       Result: robot passes through table and conveyor freely; cubes rest on both.
+  ──────────────────────────────────────────────────────────────────────── -->
+
+</mujoco>
