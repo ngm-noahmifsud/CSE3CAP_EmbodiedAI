@@ -1,0 +1,62 @@
+<mujoco model="sorting_cell">
+<compiler angle="radian"/>
+<option gravity="0 0 -9.81" timestep="0.002"/>
+<asset>
+<material name="red" rgba="1 0 0 1"/>
+<material name="blue" rgba="0 0 1 1"/>
+<material name="black" rgba="0.1 0.1 0.1 1"/>
+<material name="white" rgba="0.9 0.9 0.9 1"/>
+</asset>
+<worldbody>
+<light pos="0 0 5"/>
+<geom type="plane" size="5 5 0.1" rgba="0.3 0.3 0.3 1"/>
+<body name="conveyor_main" pos="0 0 0.05">
+<geom type="box" size="1.6 0.18 0.05" material="black"/>
+</body>
+<body name="conveyor_blue" pos="1.0 0.8 0.05">
+<geom type="box" size="1.0 0.16 0.05" material="black"/>
+</body>
+<body name="conveyor_red" pos="1.0 -0.8 0.05">
+<geom type="box" size="1.0 0.16 0.05" material="black"/>
+</body>
+<body name="robot_base" pos="-0.4 0 0.12">
+<geom type="cylinder" size="0.18 0.08" material="white"/>
+<body name="link1" pos="0 0 0.12">
+<joint name="j1" type="hinge" axis="0 0 1" range="-3.14 3.14"/>
+<geom type="capsule" fromto="0 0 0 0.35 0 0.25" size="0.045" material="white"/>
+<body name="link2" pos="0.35 0 0.25">
+<joint name="j2" type="hinge" axis="0 1 0" range="-1.57 1.57"/>
+<geom type="capsule" fromto="0 0 0 0.35 0 0" size="0.04" material="white"/>
+<body name="link3" pos="0.35 0 0">
+<joint name="j3" type="hinge" axis="0 1 0" range="-1.75 1.75"/>
+<geom type="capsule" fromto="0 0 0 0.25 0 -0.15" size="0.035" material="white"/>
+<body name="gripper" pos="0.25 0 -0.15">
+<geom type="box" size="0.07 0.04 0.03" material="black"/>
+</body>
+</body>
+</body>
+</body>
+</body>
+<body name="cube_blue_1" pos="-1.1 0.06 0.18">
+<freejoint/>
+<geom type="box" size="0.06 0.06 0.06" material="blue" mass="0.1"/>
+</body>
+<body name="cube_red_1" pos="-0.85 -0.06 0.18">
+<freejoint/>
+<geom type="box" size="0.06 0.06 0.06" material="red" mass="0.1"/>
+</body>
+<body name="cube_blue_2" pos="-0.6 0.06 0.18">
+<freejoint/>
+<geom type="box" size="0.06 0.06 0.06" material="blue" mass="0.1"/>
+</body>
+<body name="cube_red_2" pos="-0.35 -0.06 0.18">
+<freejoint/>
+<geom type="box" size="0.06 0.06 0.06" material="red" mass="0.1"/>
+</body>
+</worldbody>
+<actuator>
+<position name="act_j1" joint="j1" kp="80"/>
+<position name="act_j2" joint="j2" kp="80"/>
+<position name="act_j3" joint="j3" kp="80"/>
+</actuator>
+</mujoco>
