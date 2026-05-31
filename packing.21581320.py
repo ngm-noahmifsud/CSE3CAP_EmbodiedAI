@@ -7,7 +7,7 @@
 #        --> pip install mujoco numpy
 #    2. Clone MuJoCo Menagerie into the same folder as this script:
 #         git clone https://github.com/google-deepmind/mujoco_menagerie
-#    3. Place this file and packing_scene.xml into the following folder:
+#    3. Place this file and packing.scene.xml into the following folder:
 #         mujoco_menagerie/franka_emika_panda/
 #    4. Run:
 #         mjpython packing_21581320.py
